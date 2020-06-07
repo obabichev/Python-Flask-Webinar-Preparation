@@ -6,6 +6,11 @@
 </head>
 <body>
 <h2>Time</h2>
+{% if not current_user.is_anonymous %}
+    <div>
+        User: {{ current_user.username }} <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+{% endif %}
 <p>
     {{ time }}
 </p>

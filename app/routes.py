@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for
-from flask_login import login_user
+from flask_login import login_user, current_user, logout_user
 
 from app import app, db
 from datetime import datetime
@@ -37,3 +37,9 @@ def login():
         login_user(user, remember=True)
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))

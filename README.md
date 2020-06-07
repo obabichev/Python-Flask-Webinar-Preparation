@@ -334,3 +334,23 @@ template
 </body>
 </html>
 ```
+
+### Logout
+
+index.html
+```html
+{% if not current_user.is_anonymous %}
+    <div>
+        User: {{ current_user.username }} <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+{% endif %}
+```
+
+route
+```python
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+```
+

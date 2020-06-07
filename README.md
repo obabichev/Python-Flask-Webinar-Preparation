@@ -152,3 +152,125 @@ templates/index.html
     {% endfor %}
 </ul>
 ```
+
+### Register page
+
+```shell script
+pip install flask-login
+pip freeze > requirements.txt
+```
+
+__init__
+```python
+login = LoginManager(app)
+```
+
+models.py
+```python
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from app import db
+
+
+class User(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    username = db.Column(db.String(256), unique=True, nullable=False)
+    email = db.Column(db.String(256), unique=True, nullable=False)
+    password_hash = db.Column(db.String(1024), nullable=False)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+```
+
+```shell script
+pip install flask-wtf
+```
+
+forms.py
+```python
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, ValidationError
+
+from app.models import User
+
+
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    password = StringField('Password', validators=[DataRequired()])
+    submit = SubmitField('Register')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
+        if user is not None:
+            raise ValidationError('User with this username already exists')
+```
+
+routes.py
+```python
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('register.html', form=form)
+
+```
+
+register.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask Webinar Preparation</title>
+</head>
+<body>
+<h2>Register</h2>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        <div>{{ form.username.label }}</div>
+        <div>{{ form.username() }}</div>
+        <div>
+            {% for error in form.username.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <div>{{ form.email.label }}</div>
+        <div>{{ form.email() }}</div>
+        <div>
+            {% for error in form.email.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <div>{{ form.password.label }}</div>
+        <div>{{ form.password(type='password') }}</div>
+        <div>
+            {% for error in form.password.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>{{ form.submit() }}</div>
+</form>
+</body>
+</html>
+```
+

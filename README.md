@@ -274,3 +274,63 @@ register.html
 </html>
 ```
 
+### Login
+
+forms
+```python
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = StringField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+```
+
+route
+```python
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            return redirect(url_for('login'))
+        login_user(user, remember=True)
+        return redirect(url_for('index'))
+    return render_template('login.html', form=form)
+```
+
+template
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask Webinar Preparation</title>
+</head>
+<body>
+<h2>Login</h2>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        <div>{{ form.username.label }}</div>
+        <div>{{ form.username() }}</div>
+        <div>
+            {% for error in form.username.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <div>{{ form.password.label }}</div>
+        <div>{{ form.password(type='password') }}</div>
+        <div>
+            {% for error in form.password.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>{{ form.submit() }}</div>
+</form>
+</body>
+</html>
+```

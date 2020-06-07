@@ -114,5 +114,41 @@ flask db migrate -m "User"
 flask db upgrade
 
 pip install psycopg2-binary
+flask db upgrade
 ```
 
+```sql
+insert into public.user (username, email, password_hash)
+values ('obabichev', 'babichev.oleg.n@gmail.com', '123123123');
+
+select *
+from public.user;
+```
+
+### Render users
+
+routes.py
+```python
+from flask import render_template
+
+from app import app
+from datetime import datetime
+
+from app.models import User
+
+
+@app.route('/')
+def index():
+    time = datetime.now()
+    users = User.query.all()
+    return render_template('index.html', time=time, users=users)
+```
+
+templates/index.html
+```html
+<ul>
+    {% for user in users %}
+        <li>{{ user.username }} ({{ user.email }})</li>
+    {% endfor %}
+</ul>
+```

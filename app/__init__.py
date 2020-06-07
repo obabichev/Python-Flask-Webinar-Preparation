@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from flask import Flask, render_template
+from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,9 +10,4 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from app import models
-
-
-@app.route('/')
-def index():
-    time = datetime.now()
-    return render_template('index.html', time=time)
+from app import routes

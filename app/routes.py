@@ -12,7 +12,8 @@ from app.models import User, Post
 def index():
     time = datetime.now()
     users = User.query.all()
-    return render_template('index.html', time=time, users=users)
+    posts = Post.query.all()
+    return render_template('index.html', time=time, users=users, posts=posts)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -55,3 +56,9 @@ def create_post():
         db.session.commit()
         return redirect(url_for('index'))
     return render_template('create_post.html', form=form)
+
+
+@app.route('/post/<id>')
+def post_page(id):
+    post = Post.query.filter_by(id=int(id)).first()
+    return render_template('post.html', post=post)

@@ -429,3 +429,42 @@ class CreatePostForm(FlaskForm):
     submit = SubmitField('CreatePost')
 ```
 
+### Render post
+
+index.html
+```html
+<ul>
+    {% for post in posts %}
+        <li><a href="{{ url_for('post_page', id=post.id) }}">
+            {{ post.title }} ({{ post.owner.username }})
+        </a></li>
+    {% endfor %}
+</ul>
+```
+
+post.html
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>{{ post.title }}</h1>
+
+<div>
+    {{ post.content | safe }}
+</div>
+</body>
+</html>
+```
+
+route
+```python
+@app.route('/post/<id>')
+def post_page(id):
+    post = Post.query.filter_by(id=int(id)).first()
+    return render_template('post.html', post=post)
+```
+

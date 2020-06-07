@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        <div>{{ form.title.label }}</div>
+        <div>{{ form.title() }}</div>
+        <div>
+            {% for error in form.title.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <div>{{ form.content.label }}</div>
+        <div>{{ form.content() }}</div>
+        <div>
+            {% for error in form.content.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>{{ form.submit() }}</div>
+</form>
+</body>
+</html>

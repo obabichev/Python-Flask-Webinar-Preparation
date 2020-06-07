@@ -354,3 +354,78 @@ def logout():
     return redirect(url_for('index'))
 ```
 
+### Post model
+
+model
+```python
+class Post(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    title = db.Column(db.String(1024), nullable=False)
+    content = db.Column(db.String(100000))
+    created_by = db.Column(db.BigInteger, db.ForeignKey('user.id'))
+```
+
+```shell script
+flask db migrate -m "post"
+flask db upgrade
+```
+
+### Create post
+
+template 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        <div>{{ form.title.label }}</div>
+        <div>{{ form.title() }}</div>
+        <div>
+            {% for error in form.title.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>
+        <div>{{ form.content.label }}</div>
+        <div>{{ form.content() }}</div>
+        <div>
+            {% for error in form.content.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    </div>
+    <div>{{ form.submit() }}</div>
+</form>
+</body>
+</html>
+```
+
+roter
+```python
+@app.route('/create_post', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    form = CreatePostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data, owner=current_user)
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('create_post.html', form=form)
+```
+
+form
+```python
+class CreatePostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired()])
+    content = TextAreaField('Content')
+    submit = SubmitField('CreatePost')
+```
+

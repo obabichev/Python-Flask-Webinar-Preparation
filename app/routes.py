@@ -1,11 +1,11 @@
 from flask import render_template, redirect, url_for
-from flask_login import login_user, current_user, logout_user
+from flask_login import login_user, current_user, logout_user, login_required
 
 from app import app, db
 from datetime import datetime
 
-from app.forms import RegisterForm, LoginForm
-from app.models import User
+from app.forms import RegisterForm, LoginForm, CreatePostForm
+from app.models import User, Post
 
 
 @app.route('/')
@@ -43,3 +43,15 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/create_post', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    form = CreatePostForm()
+    if form.validate_on_submit():
+        post = Post(title=form.title.data, content=form.content.data, owner=current_user)
+        db.session.add(post)
+        db.session.commit()
+        return redirect(url_for('index'))
+    return render_template('create_post.html', form=form)

@@ -35,3 +35,84 @@ FLASK_ENV=development flask run
 
 ### Create template
 
+app/templates/index.html
+```jinja2
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask Webinar Preparation</title>
+</head>
+<body>
+<h2>Time</h2>
+<p>
+    {{ time }}
+</p>
+</body>
+</html>
+```
+
+app/__init__.py
+```python
+#...
+
+@app.route('/')
+def index():
+    time = datetime.now()
+    return render_template('index.html', time=time)
+```
+
+### Database
+
+```shell script
+docker run -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test -p 5433:5432 -d postgres
+```
+
+### SQLAlchemy
+
+```shell script
+pip install flask-sqlalchemy
+pip install flask-migrate
+```
+
+Config.py
+```python
+class Config:
+    SQLALCHEMY_DATABASE_URI = 'postgres://test:test@localhost:5433/test'
+```
+
+app/__init__.py
+```python
+#...
+app = Flask(__name__)
+
+app.config.from_object('config.Config')
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+```
+
+### Modeling
+
+models.py
+```python
+from app import db
+
+
+class User(db.Model):
+    id = db.Column(db.BigInteger, primary_key=True)
+    username = db.Column(db.String(256), unique=True, nullable=False)
+    email = db.Column(db.String(256), unique=True, nullable=False)
+    password_hash = db.Column(db.String(1024), nullable=False)
+```
+
+### Migrations
+
+```shell script
+flask db init
+flask db migrate -m "User"
+flask db upgrade
+
+pip install psycopg2-binary
+```
+
